@@ -1,0 +1,134 @@
+// Deluge - Tours & Holidays Chatbot Handler Functions
+// Functions for SalesIQ Bot interactions
+
+// Get Featured Packages
+function getFeaturedPackages() {
+  map response = {};
+  try {
+    // Query MongoDB for featured packages
+    map query = {"featured": true};
+    list packages = invokeurl [
+      url: "https://api.mongodb.com/v1/databases/cliqtrix/collections/packages",
+      type: "GET",
+      parameters: query
+    ];
+    response.put("success", true);
+    response.put("data", packages);
+    response.put("message", "Featured packages retrieved successfully");
+  } catch (Exception e) {
+    response.put("success", false);
+    response.put("error", e.toString());
+  }
+  return response;
+}
+
+// Search Packages by Criteria
+function searchPackages(map criteria) {
+  map response = {};
+  try {
+    list packages = invokeurl [
+      url: "https://api.mongodb.com/v1/databases/cliqtrix/collections/packages",
+      type: "GET",
+      parameters: criteria
+    ];
+    response.put("success", true);
+    response.put("data", packages);
+    response.put("count", packages.size());
+  } catch (Exception e) {
+    response.put("success", false);
+    response.put("error", e.toString());
+  }
+  return response;
+}
+
+// Create Lead
+function createLead(map leadData) {
+  map response = {};
+  try {
+    // Validate lead data
+    if(!leadData.contains("name") || !leadData.contains("email")) {
+      response.put("success", false);
+      response.put("error", "Name and email are required");
+      return response;
+    }
+    
+    // Add timestamp
+    leadData.put("createdAt", now);
+    leadData.put("source", "salesiq_chatbot");
+    
+    // Create lead in MongoDB
+    map result = invokeurl [
+      url: "https://api.mongodb.com/v1/databases/cliqtrix/collections/leads",
+      type: "POST",
+      parameters: leadData
+    ];
+    response.put("success", true);
+    response.put("leadId", result.get("insertedId"));
+    response.put("message", "Lead created successfully");
+  } catch (Exception e) {
+    response.put("success", false);
+    response.put("error", e.toString());
+  }
+  return response;
+}
+
+// Create Booking
+function createBooking(map bookingData) {
+  map response = {};
+  try {
+    bookingData.put("createdAt", now);
+    bookingData.put("status", "pending");
+    
+    map result = invokeurl [
+      url: "https://api.mongodb.com/v1/databases/cliqtrix/collections/bookings",
+      type: "POST",
+      parameters: bookingData
+    ];
+    response.put("success", true);
+    response.put("bookingId", result.get("insertedId"));
+    response.put("message", "Booking created successfully");
+  } catch (Exception e) {
+    response.put("success", false);
+    response.put("error", e.toString());
+  }
+  return response;
+}
+
+// Get Lead Bookings
+function getLeadBookings(text leadId) {
+  map response = {};
+  try {
+    map query = {"leadId": leadId};
+    list bookings = invokeurl [
+      url: "https://api.mongodb.com/v1/databases/cliqtrix/collections/bookings",
+      type: "GET",
+      parameters: query
+    ];
+    response.put("success", true);
+    response.put("bookings", bookings);
+  } catch (Exception e) {
+    response.put("success", false);
+    response.put("error", e.toString());
+  }
+  return response;
+}
+
+// Handle Chat Message
+function handleChatMessage(map message) {
+  map response = {};
+  text userMessage = message.get("text").toLowerCase();
+  
+  if(userMessage.contains("featured")) {
+    response = getFeaturedPackages();
+  }
+  else if(userMessage.contains("search") || userMessage.contains("find")) {
+    response.put("action", "search_packages");
+  }
+  else if(userMessage.contains("booking")) {
+    response.put("action", "show_bookings");
+  }
+  else {
+    response.put("action", "show_menu");
+  }
+  return response;
+}
