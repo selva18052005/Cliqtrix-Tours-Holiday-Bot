@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tours & Holidays Chatbot</title>
+    <link rel="stylesheet" href="styles/style.css">
+</head>
+<body>
+    <div class="chatbot-container">
+        <div class="chatbot-header">
+            <h1>🌍 Tours & Holidays</h1>
+            <p>Find your perfect travel experience</p>
+        </div>
+        
+        <div class="chatbot-body">
+            <div id="chat-messages" class="chat-messages">
+                <div class="bot-message">
+                    <p>Hello! Welcome to Tours & Holidays. How can I help you today?</p>
+                </div>
+                <div class="bot-message">
+                    <div class="chat-options">
+                        <button onclick="handleOption('featured')">📦 Featured Packages</button>
+                        <button onclick="handleOption('search')">🔍 Find a Package</button>
+                        <button onclick="handleOption('mybooking')">📅 My Bookings</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="chatbot-footer">
+            <input type="text" id="user-input" placeholder="Type your message..." />
+            <button onclick="sendMessage()">Send</button>
+        </div>
+    </div>
+    
+    <script src="js/chatbot.js"></script>
+</body>
+</html>
