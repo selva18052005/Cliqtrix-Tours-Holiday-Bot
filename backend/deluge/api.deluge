@@ -1,0 +1,78 @@
+// API Endpoints - Deluge Backend
+// REST API integration for SalesIQ Chatbot
+
+// API Endpoint: Get All Packages
+@api
+function getPackages() {
+  response.setHeader("Content-Type", "application/json");
+  try {
+    map query = {};
+    list packages = invokeurl [
+      url: "https://api.mongodb.com/v1/databases/cliqtrix/collections/packages",
+      type: "GET",
+      parameters: query
+    ];
+    return {"success": true, "data": packages};
+  } catch (Exception e) {
+    return {"success": false, "error": e.toString()};
+  }
+}
+
+// API Endpoint: Create Lead
+@api
+function createLeadAPI(map leadData) {
+  response.setHeader("Content-Type", "application/json");
+  leadData.put("createdAt", now);
+  return createLead(leadData);
+}
+
+// API Endpoint: Create Booking
+@api
+function createBookingAPI(map bookingData) {
+  response.setHeader("Content-Type", "application/json");
+  return createBooking(bookingData);
+}
+
+// API Endpoint: Get Lead Details
+@api
+function getLeadAPI(text leadId) {
+  response.setHeader("Content-Type", "application/json");
+  try {
+    map query = {"_id": leadId};
+    list result = invokeurl [
+      url: "https://api.mongodb.com/v1/databases/cliqtrix/collections/leads",
+      type: "GET",
+      parameters: query
+    ];
+    if(result.size() > 0) {
+      return {"success": true, "data": result.get(0)};
+    }
+    return {"success": false, "error": "Lead not found"};
+  } catch (Exception e) {
+    return {"success": false, "error": e.toString()};
+  }
+}
+
+// API Endpoint: Search Packages
+@api
+function searchPackagesAPI(map criteria) {
+  response.setHeader("Content-Type", "application/json");
+  return searchPackages(criteria);
+}
+
+// API Endpoint: Update Booking Status
+@api
+function updateBookingStatus(text bookingId, text status) {
+  response.setHeader("Content-Type", "application/json");
+  try {
+    map updateData = {"status": status, "updatedAt": now};
+    map result = invokeurl [
+      url: "https://api.mongodb.com/v1/databases/cliqtrix/collections/bookings/" + bookingId,
+      type: "PATCH",
+      parameters: updateData
+    ];
+    return {"success": true, "message": "Booking status updated"};
+  } catch (Exception e) {
+    return {"success": false, "error": e.toString()};
+  }
+}
